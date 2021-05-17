@@ -66,6 +66,10 @@ type TaskRunSpec struct {
 	// Workspaces is a list of WorkspaceBindings from volumes to workspaces.
 	// +optional
 	Workspaces []WorkspaceBinding `json:"workspaces,omitempty"`
+	// ExecutionMode specifies the execution mode to run user-specified containers in
+	// (tekton injected containers will not run with this policy)
+	// +optional
+	ExecutionMode ExecutionMode `json:"executionMode,omitempty"`
 }
 
 // TaskRunSpecStatus defines the taskrun spec status the user can provide

@@ -104,6 +104,11 @@ type TaskSpec struct {
 
 	// Results are values that this Task can output
 	Results []TaskResult `json:"results,omitempty"`
+
+	// ExecutionMode specifies the execution mode to run user-specified containers in
+	// (tekton injected containers will not run with this policy)
+	// +optional
+	ExecutionMode ExecutionMode `json:"executionMode,omitempty"`
 }
 
 // TaskResult used to describe the results of a task
@@ -198,3 +203,7 @@ const (
 	// ClusterTaskKind indicates that task type has a cluster scope.
 	ClusterTaskKind TaskKind = "ClusterTask"
 )
+
+type ExecutionMode struct {
+	Hermetic bool `json:"hermetic,omitempty"`
+}

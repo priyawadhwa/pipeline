@@ -25,6 +25,7 @@ import (
 	"syscall"
 
 	"github.com/tektoncd/pipeline/pkg/entrypoint"
+	"github.com/tektoncd/pipeline/pkg/pod"
 )
 
 // TODO(jasonhall): Test that original exit code is propagated and that
@@ -57,6 +58,31 @@ func (rr *realRunner) Run(ctx context.Context, args ...string) error {
 	// dedicated PID group used to forward signals to
 	// main process and all children
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+	if os.Getenv("TEKTON_RESOURCE_NAME") == "" && os.Getenv(pod.HermeticEnvVar) == "1" {
+		cmd.SysProcAttr.Cloneflags = syscall.CLONE_NEWNS |
+			syscall.CLONE_NEWPID |
+			syscall.CLONE_NEWNET |
+			syscall.CLONE_NEWUSER
+
+		cmd.SysProcAttr.GidMappingsEnableSetgroups = true
+		cmd.SysProcAttr.UidMappings = []syscall.SysProcIDMap{
+			{
+				ContainerID: 0,
+				HostID:      0,
+				// Map all users
+				Size: 4294967295,
+			},
+		}
+		cmd.SysProcAttr.GidMappings = []syscall.SysProcIDMap{
+			{
+				ContainerID: 0,
+				HostID:      0,
+				//  Map all groups
+				Size: 4294967295,
+			},
+		}
+	}
 
 	// Start defined command
 	if err := cmd.Start(); err != nil {

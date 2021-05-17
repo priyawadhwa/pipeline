@@ -509,6 +509,11 @@
           "description": "Description is a user-facing description of the task that may be used to populate a UI.",
           "type": "string"
         },
+        "executionMode": {
+          "description": "ExecutionMode specifies the execution mode to run user-specified containers in (tekton injected containers will not run with this policy)",
+          "default": {},
+          "$ref": "#/definitions/v1beta1.ExecutionMode"
+        },
         "metadata": {
           "default": {},
           "$ref": "#/definitions/v1beta1.PipelineTaskMetadata"
@@ -568,6 +573,14 @@
             "default": {},
             "$ref": "#/definitions/v1beta1.WorkspaceDeclaration"
           }
+        }
+      }
+    },
+    "v1beta1.ExecutionMode": {
+      "type": "object",
+      "properties": {
+        "hermetic": {
+          "type": "boolean"
         }
       }
     },
@@ -2178,6 +2191,11 @@
       "description": "TaskRunSpec defines the desired state of TaskRun",
       "type": "object",
       "properties": {
+        "executionMode": {
+          "description": "ExecutionMode specifies the execution mode to run user-specified containers in (tekton injected containers will not run with this policy)",
+          "default": {},
+          "$ref": "#/definitions/v1beta1.ExecutionMode"
+        },
         "params": {
           "type": "array",
           "items": {
@@ -2399,6 +2417,11 @@
         "description": {
           "description": "Description is a user-facing description of the task that may be used to populate a UI.",
           "type": "string"
+        },
+        "executionMode": {
+          "description": "ExecutionMode specifies the execution mode to run user-specified containers in (tekton injected containers will not run with this policy)",
+          "default": {},
+          "$ref": "#/definitions/v1beta1.ExecutionMode"
         },
         "params": {
           "description": "Params is a list of input parameters required to run the task. Params must be supplied as inputs in TaskRuns unless they declare a default value.",
