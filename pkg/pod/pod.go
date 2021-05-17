@@ -43,10 +43,6 @@ const (
 	// TaskRunLabelKey is the name of the label added to the Pod to identify the TaskRun
 	TaskRunLabelKey = pipeline.GroupName + pipeline.TaskRunLabelKey
 
-	// ExecutionModeAnnotation is the annotation set on a tekton resource to indicate running in hermetic mode
-	ExecutionModeAnnotation = "experimental.tekton.dev/execution-mode"
-	// HermeticExecutionMode indicates running in a hermetic environment
-	HermeticExecutionMode = "hermetic"
 	// HermeticEnvVar is the env var we set in containers to indicate they should be run hermetically
 	HermeticEnvVar = "HERMETIC"
 )
@@ -175,8 +171,8 @@ func (b *Builder) Build(ctx context.Context, taskRun *v1beta1.TaskRun, taskSpec 
 		}
 	}
 
-	// Add hermetic env var
-	if taskRun.Annotations[ExecutionModeAnnotation] == HermeticExecutionMode {
+	// Add env var if hermetic execution was requested
+	if taskRun.Spec.ExecutionMode.Hermetic {
 		for i, s := range stepContainers {
 			// Add it at the end so it overrides
 			env := append(s.Env, corev1.EnvVar{Name: HermeticEnvVar, Value: "1"})
