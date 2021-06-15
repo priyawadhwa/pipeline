@@ -219,7 +219,7 @@ func checkValidated(rs []v1beta1.PipelineResourceResult) error {
 	}
 	svid, ok := resultMap["SVID"]
 	if !ok {
-		return errors.New("No SVID found")
+		return errors.New("no SVID found")
 	}
 	block, _ := pem.Decode([]byte(svid.Value))
 	cert, err := x509.ParseCertificate(block.Bytes)
