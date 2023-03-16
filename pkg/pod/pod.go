@@ -32,6 +32,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/utils/pointer"
 )
 
 const (
@@ -238,6 +239,23 @@ func (b *Builder) Build(ctx context.Context, taskRun *v1beta1.TaskRun, taskSpec 
 			},
 		},
 	})
+	// IF SPIRE also add service account volume projection
+	volumes = append(volumes, corev1.Volume{
+		Name: "oidc-info",
+		VolumeSource: corev1.VolumeSource{
+			Projected: &corev1.ProjectedVolumeSource{
+				Sources: []corev1.VolumeProjection{
+					{
+						ServiceAccountToken: &corev1.ServiceAccountTokenProjection{
+							Path:              "oidc-token",
+							ExpirationSeconds: pointer.Int64Ptr(86400),
+							Audience:          "sigstore",
+						},
+					},
+				},
+			},
+		},
+	})
 	podName := names.SimpleNameGenerator.RestrictLengthWithRandomSuffix(fmt.Sprintf("%s-pod", taskRun.Name))
 	for i := range stepContainers {
 		c := &stepContainers[i]
@@ -245,12 +263,20 @@ func (b *Builder) Build(ctx context.Context, taskRun *v1beta1.TaskRun, taskSpec 
 			Name:      "spire",
 			MountPath: "/run/spire/sockets/agent.sock",
 		})
+		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
+			Name:      "oidc-info",
+			MountPath: "/var/run/secrets/tokens",
+		})
 	}
 	for i := range initContainers {
 		c := &initContainers[i]
 		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
 			Name:      "spire",
 			MountPath: "/run/spire/sockets/agent.sock",
+		})
+		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
+			Name:      "sa-volume-projection",
+			MountPath: "/var/run/secrets/tokens",
 		})
 	}
 
